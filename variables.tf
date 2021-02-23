@@ -26,7 +26,7 @@ variable "virtual_network_name" {
 # Test VM Variables
 variable "vm_name" {
   description = "Specifies VM name"
-  default = "test_vm"
+  default = "test-vm"
 }
 
 variable "vm_size" {

@@ -29,22 +29,22 @@ resource "azurerm_virtual_network" "testnetwork" {
 
 resource "azurerm_subnet" "testsubnet" {
   name                 = "${var.virtual_network_name}-sub1"
-  resource_group_name  = var.resource_group
-  virtual_network_name = var.virtual_network_name
+  resource_group_name  = azurerm_resource_group.testgroup.name
+  virtual_network_name = azurerm_virtual_network.testnetwork.name
   address_prefixes     = [var.subnet_prefix]
 }
 
 resource "azurerm_public_ip" "testpubip" {
     name                         = "${var.vm_name}-testpubip"
     location                     = var.location
-    resource_group_name          = var.resource_group
+    resource_group_name          = azurerm_resource_group.testgroup.name
     allocation_method            = "Dynamic"
 }
 
 resource "azurerm_network_interface" "testnic" {
   name                = "${var.vm_name}-testnic"
   location            = var.location
-  resource_group_name = var.resource_group
+  resource_group_name = azurerm_resource_group.testgroup.name
 
   ip_configuration {
     name                          = "internal"
@@ -57,7 +57,7 @@ resource "azurerm_network_interface" "testnic" {
 
 resource "azurerm_linux_virtual_machine" "test" {
   name                = var.vm_name
-  resource_group_name = var.resource_group
+  resource_group_name = azurerm_resource_group.testgroup.name
   location            = var.location
   size                = var.vm_size
   admin_username      = "adminuser"
