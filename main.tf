@@ -15,51 +15,51 @@ provider "azurerm" {
 
 # Create a resource group
 resource "azurerm_resource_group" "testgroup" {
-  name     = "test-resources"
-  location = "West Europe"
+  name     = var.resource_group
+  location = var.location
 }
 
 # Create a virtual network within the resource group
 resource "azurerm_virtual_network" "testnetwork" {
-  name                = "test-network"
+  name                = var.virtual_network_name
   resource_group_name = azurerm_resource_group.testgroup.name
-  location            = azurerm_resource_group.testgroup.location
-  address_space       = ["10.0.0.0/16"]
+  location            = var.location
+  address_space       = [var.address_space]
 }
 
 resource "azurerm_subnet" "testsubnet" {
-  name                 = "internal"
-  resource_group_name  = azurerm_resource_group.testgroup.name
-  virtual_network_name = azurerm_virtual_network.testnetwork.name
-  address_prefixes     = ["10.0.2.0/24"]
+  name                 = "${var.virtual_network_name}-sub1"
+  resource_group_name  = var.resource_group
+  virtual_network_name = var.virtual_network_name
+  address_prefixes     = [var.subnet_prefix]
 }
 
 resource "azurerm_public_ip" "testpubip" {
-    name                         = "testpubip"
-    location                     = azurerm_resource_group.testgroup.location
-    resource_group_name          = azurerm_resource_group.testgroup.name
+    name                         = "${var.vm_name}-testpubip"
+    location                     = var.location
+    resource_group_name          = var.resource_group
     allocation_method            = "Dynamic"
 }
 
 resource "azurerm_network_interface" "testnic" {
-  name                = "test-nic"
-  location            = azurerm_resource_group.testgroup.location
-  resource_group_name = azurerm_resource_group.testgroup.name
+  name                = "${var.vm_name}-testnic"
+  location            = var.location
+  resource_group_name = var.resource_group
 
   ip_configuration {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.testsubnet.id
     private_ip_address_allocation = "Static"
-    private_ip_address = "10.0.2.10"
+    private_ip_address = var.vm_private_ip
     public_ip_address_id = azurerm_public_ip.testpubip.id
   }
 }
 
 resource "azurerm_linux_virtual_machine" "test" {
-  name                = "test-machine"
-  resource_group_name = azurerm_resource_group.testgroup.name
-  location            = azurerm_resource_group.testgroup.location
-  size                = "Standard_A1_V2"
+  name                = var.vm_name
+  resource_group_name = var.resource_group
+  location            = var.location
+  size                = var.vm_size
   admin_username      = "adminuser"
   network_interface_ids = [azurerm_network_interface.testnic.id]
 #   delete_data_disks_on_termination = true
